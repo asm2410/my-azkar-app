@@ -906,14 +906,73 @@ function App() {
         </div>
       )}
 
-      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex items-center justify-center p-4 overflow-auto relative">
+        <div className="w-full max-w-2xl space-y-4">
+          {/* Morning/Evening Azkar Box */}
+          {(() => {
+            const timeOfDay = getCurrentTimeOfDay();
+            const relevantAzkar = morningEveningAzkar.filter(azkar =>
+              (timeOfDay === 'morning' && azkar.time === 'morning') ||
+              (timeOfDay === 'evening' && azkar.time === 'evening')
+            );
+
+            if (relevantAzkar.length > 0) {
+              return (
+                <div
+                  className="rounded-3xl shadow-2xl p-6"
+                  style={{
+                    backgroundColor: colors.card,
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  <h3 className="text-xl font-bold mb-4 text-center" style={{ color: colors.text }}>
+                    {timeOfDay === 'morning' ? 'أذكار الصباح' : 'أذكار المساء'}
+                  </h3>
+                  <div className="space-y-4">
+                    {relevantAzkar.map((azkar) => (
+                      <label key={azkar.id} className="container flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={readAzkar.has(azkar.id)}
+                          onChange={(e) => {
+                            const newReadAzkar = new Set(readAzkar);
+                            if (e.target.checked) {
+                              newReadAzkar.add(azkar.id);
+                            } else {
+                              newReadAzkar.delete(azkar.id);
+                            }
+                            setReadAzkar(newReadAzkar);
+                            localStorage.setItem('readAzkar', JSON.stringify([...newReadAzkar]));
+                          }}
+                        />
+                        <span className="checkmark" style={{ marginTop: '0.2rem' }}></span>
+                        <div className="flex-1">
+                          <p className="text-xl font-semibold mb-2" style={{ color: colors.text }}>
+                            {azkar.arabic}
+                          </p>
+                          <p className="text-sm italic mb-1" style={{ color: colors.textLight }}>
+                            {azkar.transliteration}
+                          </p>
+                          <p className="text-sm" style={{ color: colors.textLight }}>
+                            {azkar.translation}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
+          {/* Main Zikr Box */}
           <div
             onClick={handleZikrClick}
             className={`rounded-3xl shadow-2xl p-8 min-h-[400px] flex flex-col justify-center transition-all duration-300 cursor-pointer active:scale-98 relative ${
               showCelebration ? 'scale-105 ring-4' : ''
             }`}
-            style={{ 
+            style={{
               backgroundColor: colors.card,
               boxShadow: showCelebration ? `0 0 0 4px ${colors.accent}` : '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
               transform: pullDistance > 0 ? `translateY(${Math.min(pullDistance * 0.5, 50)}px)` : 'translateY(0)'
@@ -922,7 +981,7 @@ function App() {
             {/* Counter inside the box - smaller and positioned */}
             <div className="absolute top-4 right-4">
               <div className="flex items-center gap-2">
-                <p 
+                <p
                   className={`font-bold transition-all duration-300 text-lg ${showCelebration ? 'scale-125' : ''}`}
                   style={{ color: showCelebration ? colors.accent : colors.textLight }}
                 >
@@ -938,66 +997,10 @@ function App() {
             </div>
 
             <div className={`transition-opacity duration-200 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-              {/* Morning/Evening Azkar Section */}
-              {(() => {
-                const timeOfDay = getCurrentTimeOfDay();
-                const relevantAzkar = morningEveningAzkar.filter(azkar => 
-                  (timeOfDay === 'morning' && azkar.time === 'morning') ||
-                  (timeOfDay === 'evening' && azkar.time === 'evening')
-                );
-                
-                if (relevantAzkar.length > 0) {
-                  return (
-                    <div className="mb-6">
-                      <div 
-                        className="rounded-2xl p-4 mb-4"
-                        style={{ backgroundColor: colors.header }}
-                      >
-                        <h3 className="text-sm font-semibold mb-3" style={{ color: colors.text }}>
-                          {timeOfDay === 'morning' ? 'أذكار الصباح' : 'أذكار المساء'}
-                        </h3>
-                        <div className="space-y-3">
-                          {relevantAzkar.map((azkar) => (
-                            <label key={azkar.id} className="container flex items-start gap-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={readAzkar.has(azkar.id)}
-                                onChange={(e) => {
-                                  const newReadAzkar = new Set(readAzkar);
-                                  if (e.target.checked) {
-                                    newReadAzkar.add(azkar.id);
-                                  } else {
-                                    newReadAzkar.delete(azkar.id);
-                                  }
-                                  setReadAzkar(newReadAzkar);
-                                }}
-                              />
-                              <span className="checkmark" style={{ marginTop: '0.2rem' }}></span>
-                              <div className="flex-1">
-                                <p className="text-lg font-semibold mb-1" style={{ color: colors.text }}>
-                                  {azkar.arabic}
-                                </p>
-                                <p className="text-sm italic mb-1" style={{ color: colors.textLight }}>
-                                  {azkar.transliteration}
-                                </p>
-                                <p className="text-xs" style={{ color: colors.textLight }}>
-                                  {azkar.translation}
-                                </p>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
               <div className="text-center mb-6">
-                <p 
-                  className="text-5xl leading-relaxed font-semibold mb-6" 
-                  style={{ 
+                <p
+                  className="text-5xl leading-relaxed font-semibold mb-6"
+                  style={{
                     color: colors.text,
                     fontFamily: "'Cairo', 'Segoe UI', sans-serif",
                     lineHeight: '1.8'
@@ -1008,20 +1011,20 @@ function App() {
               </div>
 
               <div className="space-y-3 text-center">
-                <p 
+                <p
                   className="text-lg italic"
                   style={{ color: colors.textLight }}
                 >
                   {currentZikr.transliteration}
                 </p>
-                <p 
+                <p
                   className="text-base"
                   style={{ color: colors.textLight }}
                 >
                   {currentZikr.translation}
                 </p>
                 {currentZikr.preferredTime && (
-                  <p 
+                  <p
                     className="text-xs mt-2"
                     style={{ color: colors.accent }}
                   >
@@ -1036,7 +1039,7 @@ function App() {
             </div>
 
             {showCelebration && (
-              <div 
+              <div
                 className="text-center mt-4 text-lg font-bold animate-bounce"
                 style={{ color: colors.accent }}
               >
