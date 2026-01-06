@@ -910,10 +910,19 @@ function App() {
         <div className="w-full max-w-2xl space-y-4">
           {/* Morning/Evening Azkar Box */}
           {(() => {
-            const timeOfDay = getCurrentTimeOfDay();
+            const now = new Date();
+            const hours = now.getHours();
+            const isMorning = hours >= 5 && hours < 12;
+            const isEvening = hours >= 17 && hours < 20;
+
+            if (!isMorning && !isEvening) {
+              return null;
+            }
+
+            const timeOfDay = isMorning ? 'morning' : 'evening';
             const relevantAzkar = morningEveningAzkar.filter(azkar =>
-              (timeOfDay === 'morning' && azkar.time === 'morning') ||
-              (timeOfDay === 'evening' && azkar.time === 'evening')
+              (isMorning && azkar.time === 'morning') ||
+              (isEvening && azkar.time === 'evening')
             );
 
             if (relevantAzkar.length > 0) {
